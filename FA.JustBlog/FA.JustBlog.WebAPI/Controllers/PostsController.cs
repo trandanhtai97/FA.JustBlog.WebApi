@@ -20,16 +20,16 @@ namespace FA.JustBlog.WebAPI.Controllers
             _postServices = postServices;
         }
 
-        // GET: api/Categories
+        // GET: api/Post
         [HttpGet]
         public async Task<IHttpActionResult> Get()
         {
             return Ok(await _postServices.GetAllAsync());
         }
 
-        // GET: api/Categories/5
+        // GET: api/POst/5
         [HttpGet]
-        [ResponseType(typeof(Category))]
+        [ResponseType(typeof(Post))]
         public async Task<IHttpActionResult> GetById(Guid id)
         {
             var post = await _postServices.GetByIdAsync(id);
@@ -42,7 +42,7 @@ namespace FA.JustBlog.WebAPI.Controllers
         }
 
 
-        // DELETE: api/Categories/5
+        // DELETE: api/post/5
         [HttpDelete]
         [ResponseType(typeof(bool))]
         public async Task<IHttpActionResult> Delete(Guid id)
