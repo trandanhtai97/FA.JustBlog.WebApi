@@ -41,36 +41,6 @@ namespace FA.JustBlog.WebAPI.Controllers
             return Ok(post);
         }
 
-        // PUT: api/Categories/5
-        [HttpPut]
-        [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> Update(Guid id, CategoryEditViewModel categoryEditViewModel)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            var category = await _categoryServices.GetByIdAsync(id);
-            if (category == null)
-            {
-                return BadRequest();
-            }
-
-            category.Name = categoryEditViewModel.Name;
-            category.UrlSlug = categoryEditViewModel.UrlSlug;
-            category.Description = categoryEditViewModel.Description;
-
-            var result = await _categoryServices.UpdateAsync(category);
-            if (!result)
-            {
-                return BadRequest();
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
-        }
-
-        
 
         // DELETE: api/Categories/5
         [HttpDelete]
