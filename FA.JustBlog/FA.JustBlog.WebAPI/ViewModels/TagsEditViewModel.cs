@@ -22,5 +22,7 @@ namespace FA.JustBlog.WebAPI.ViewModels
         public int Count { get; set; }
 
         public List<Guid> PostId { get; set; }
+
+        public bool IsEdit { get; set; }
     }
 }

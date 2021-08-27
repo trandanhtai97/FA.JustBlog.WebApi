@@ -44,74 +44,74 @@ namespace FA.JustBlog.WebAPI.Controllers
         }
 
         // PUT: api/Tags/5
-        [HttpPut]
+        [HttpPost]
         [ResponseType(typeof(void))]
-        public async Task<IHttpActionResult> PutTags(Guid id, TagsEditViewModel tagsEditViewModel)
+        public async Task<IHttpActionResult> CreateUpdate(TagsEditViewModel tagEditViewModel)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var tags = await _tagServices.GetByIdAsync(id);
-            if (tags == null)
+            if (tagEditViewModel.IsEdit)
+            {
+                var tagEdit = await Update(tagEditViewModel);
+                if (tagEdit == null)
+                {
+                    return BadRequest(ModelState);
+                }
+                return Ok(tagEdit);
+            }
+            var tagCreated = await Create(tagEditViewModel);
+            if (tagCreated == null)
             {
                 return BadRequest();
             }
-
-            tags.Name = tagsEditViewModel.Name;
-            tags.UrlSlug = tagsEditViewModel.UrlSlug;
-            tags.Description = tagsEditViewModel.Description;
-            tags.Count = tagsEditViewModel.Count;
-
-            var result = await _tagServices.UpdateAsync(tags);
-            if (!result)
-            {
-                return BadRequest();
-            }
-
-            return StatusCode(HttpStatusCode.NoContent);
+            return Ok(tagCreated);
         }
 
-        // POST: api/Tags
-        [ResponseType(typeof(Tag))]
-        public async Task<IHttpActionResult> PostTag(TagsEditViewModel tagEditViewModel)
+        private async Task<Tag> Create(TagsEditViewModel tagEditViewModel)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
             var tag = new Tag()
             {
                 Id = tagEditViewModel.Id,
                 Name = tagEditViewModel.Name,
                 UrlSlug = tagEditViewModel.UrlSlug,
                 Description = tagEditViewModel.Description,
-                Count = tagEditViewModel.Count
             };
 
             var result = await _tagServices.AddAsync(tag);
-            if (result <= 0)
+            if (result > 0)
             {
-                return BadRequest(ModelState);
+                return tag;
             }
-
-            var tagViewNodel = new TagViewModel
+            else
             {
-                Id = tag.Id,
-                Name = tag.Name,
-                UrlSlug = tag.UrlSlug,
-                Description = tag.Description,
-                Count = tag.Count,
-                IsDeleted = tag.IsDeleted,
-                InsertedAt = tag.InsertedAt,
-                UpdatedAt = tag.UpdatedAt,
-            };
-
-            return CreatedAtRoute("DefaultApi", new { id = tag.Id }, tagViewNodel);
+                return null;
+            }
         }
 
+        private async Task<Tag> Update(TagsEditViewModel tagEditViewModel)
+        {
+            var tags = await _tagServices.GetByIdAsync(tagEditViewModel.Id);
+            if (tags == null)
+            {
+                return null;
+            }
+
+            tags.Name = tagEditViewModel.Name;
+            tags.UrlSlug = tagEditViewModel.UrlSlug;
+            tags.Description = tagEditViewModel.Description;
+            var result = await _tagServices.UpdateAsync(tags);
+            if (result)
+            {
+                return tags;
+            }
+            else
+            {
+                return null;
+            }
+        }
         // DELETE: api/Tags/5
         [ResponseType(typeof(Tag))]
         public async Task<IHttpActionResult> DeleteTag(Guid id)

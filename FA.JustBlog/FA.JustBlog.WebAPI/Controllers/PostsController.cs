@@ -40,7 +40,80 @@ namespace FA.JustBlog.WebAPI.Controllers
 
             return Ok(post);
         }
+        [HttpPost]
+        [ResponseType(typeof(void))]
+        public async Task<IHttpActionResult> CreateUpdate(PostEditViewModel postEditViewModel)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
+            if (postEditViewModel.IsEdit)
+            {
+                var postEdit = await Update(postEditViewModel);
+                if (postEdit == null)
+                {
+                    return BadRequest(ModelState);
+                }
+                return Ok(postEdit);
+            }
+            var postCreate = await Create(postEditViewModel);
+            if (postCreate == null)
+            {
+                return BadRequest();
+            }
+            return Ok(postCreate);
+        }
+
+        private async Task<Post> Create(PostEditViewModel postEditViewModel)
+        {
+            var post = new Post()
+            {
+                Id = postEditViewModel.Id,
+                Title = postEditViewModel.Title,
+                UrlSlug = postEditViewModel.UrlSlug,
+                ShortDescription = postEditViewModel.ShortDescription,
+                PublishedDate = postEditViewModel.PublishedDate,
+                CategoryId = postEditViewModel.CategoryId,
+                
+            };
+
+            var result = await _postServices.AddAsync(post);
+            if (result > 0)
+            {
+                return post;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        private async Task<Post> Update(PostEditViewModel postEditViewModel)
+        {
+            var post = await _postServices.GetByIdAsync(postEditViewModel.Id);
+            if (post == null)
+            {
+                return null;
+            }
+
+            post.Title = postEditViewModel.Title;
+            post.UrlSlug = postEditViewModel.UrlSlug;
+            post.ShortDescription = postEditViewModel.ShortDescription;
+            post.PublishedDate = postEditViewModel.PublishedDate;
+            post.CategoryId = postEditViewModel.CategoryId;
+
+            var result = await _postServices.UpdateAsync(post);
+            if (result)
+            {
+                return post;
+            }
+            else
+            {
+                return null;
+            }
+        }
 
         // DELETE: api/post/5
         [HttpDelete]
